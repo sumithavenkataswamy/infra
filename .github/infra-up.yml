@@ -1,0 +1,73 @@
+name: Build and Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select environment to deploy (dev, test, sit, prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - test
+          - sit
+          - prod
+
+env:
+  AZURE_LOCATION: westeurope
+
+jobs:
+  create-infra:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 1: Set environment variables
+      - name: Set environment specific variables
+        id: set_vars
+        run: |
+          echo "Selected environment: ${{ github.event.inputs.environment }}"
+          
+          # Map secrets based on environment
+          case "${{ github.event.inputs.environment }}" in
+            dev)
+              echo "AZURE_CREDENTIALS=${{ secrets.AZURE_CREDENTIALS_DEV }}" >> $GITHUB_ENV
+              ;;
+            test)
+              echo "AZURE_CREDENTIALS=${{ secrets.AZURE_CREDENTIALS_TEST }}" >> $GITHUB_ENV
+              ;;
+            sit)
+              echo "AZURE_CREDENTIALS=${{ secrets.AZURE_CREDENTIALS_SIT }}" >> $GITHUB_ENV
+              ;;
+            prod)
+              echo "AZURE_CREDENTIALS=${{ secrets.AZURE_CREDENTIALS_PROD }}" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "Invalid environment selected."
+              exit 1
+              ;;
+          esac
+
+          echo "AZURE_ENV_NAME=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+
+      # Step 2: Azure Login with environment-specific credentials
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
+
+      # Step 3: Deploy Infrastructure
+      - name: Deploy Infrastructure
+        run: |
+          echo "Deploying to environment: $AZURE_ENV_NAME"
+          az deployment sub create \
+            --location ${{ env.AZURE_LOCATION }} \
+            --template-file infra/main.bicep \
+            --parameters environmentName=$AZURE_ENV_NAME
+
+      # Step 4: Verify Deployment
+      - name: Verify Deployment
+        run: |
+          az resource list --resource-group rg-passport-${AZURE_ENV_NAME}
