@@ -18,6 +18,7 @@ var resourceNames = {
   ]
   keyVaultName: 'kv-${projectName}-${environmentName}'
   appConfigName: 'appcs-${projectName}-${environmentName}'
+  storageAccountName: 'st-${projectName}-${environmentName}'
 }
 
 
@@ -50,7 +51,7 @@ module storageAccount 'storageAccount.bicep' = {
   name: 'storageAccount'
   scope: rg
   params: {
-    storageAcountName: 'st${projectName}${environmentName}sa'
+    storageAcountName: resourceNames.storageAccountName
   }
 }
 
