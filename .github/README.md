@@ -1,6 +1,8 @@
 markdown
 # 🚀 Infrastructure Deployment with Bicep
 
+Abbreviations: https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations
+
 This repository contains Bicep templates to deploy Azure infrastructure resources including:
 
 - Resource Groups  
