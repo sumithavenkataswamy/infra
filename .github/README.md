@@ -7,7 +7,8 @@ This repository contains Bicep templates to deploy Azure infrastructure resource
 - App Service Plan & App Service  
 - Service Bus Namespace & Queues  
 - Key Vault  
-- App Configuration  
+- App Configuration
+- Storage Account
 
 ---
 
